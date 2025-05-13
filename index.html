@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>TriadNexus Explorer v0.1</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    canvas { display: block; margin: auto; border: 2px solid #4ade80; }
+    .telemetry { font-family: monospace; }
+  </style>
+</head>
+<body class="bg-black text-green-400">
+
+  <!-- Header -->
+  <header class="text-center py-6 border-b border-green-700">
+    <h1 class="text-4xl font-bold text-green-300 tracking-wide">TriadNexus v0.1</h1>
+    <p class="text-sm text-green-500 mt-2">Fractal Explorer + Live Miner Telemetry</p>
+  </header>
+
+  <!-- Main Grid -->
+  <main class="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6">
+    
+    <!-- Fractal Canvas -->
+    <section class="flex flex-col items-center">
+      <h2 class="text-xl font-semibold mb-2">Fractal Viewport</h2>
+      <canvas id="fractalCanvas" width="512" height="512"></canvas>
+      <button onclick="randomizeFractal()" class="mt-4 px-4 py-2 bg-green-700 hover:bg-green-600 rounded">
+        Randomize Fractal
+      </button>
+    </section>
+
+    <!-- Miner Telemetry -->
+    <section>
+      <h2 class="text-xl font-semibold mb-4">Miner Telemetry</h2>
+      <div id="telemetry" class="telemetry bg-green-900 p-4 rounded shadow-md space-y-2">
+        <p><strong>Hashrate:</strong> <span id="hashrate">Loading...</span></p>
+        <p><strong>Temperature:</strong> <span id="temp">Loading...</span></p>
+        <p><strong>Fan Speed:</strong> <span id="fan">Loading...</span></p>
+        <p><strong>Exploration Zone:</strong> <span id="zone">Loading...</span></p>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    const canvas = document.getElementById('fractalCanvas');
+    const ctx = canvas.getContext('2d');
+
+    function drawFractal(seed) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+      const maxRadius = Math.min(centerX, centerY) * 0.9;
+      const layers = 6 + Math.floor(seed % 6);
+      const branches = 3 + (seed % 5);
+
+      for (let i = 0; i < layers; i++) {
+        const radius = (i + 1) * (maxRadius / layers);
+        for (let j = 0; j < branches; j++) {
+          const angle = (j * 2 * Math.PI) / branches + (i * 0.2);
+          const x = centerX + radius * Math.cos(angle);
+          const y = centerY + radius * Math.sin(angle);
+          ctx.beginPath();
+          ctx.arc(x, y, 6 + (seed % 4), 0, 2 * Math.PI);
+          ctx.fillStyle = `hsl(${(i * 60 + seed * 10) % 360}, 100%, 60%)`;
+          ctx.fill();
+        }
+      }
+    }
+
+    function randomizeFractal() {
+      const seed = Math.floor(Math.random() * 1000);
+      drawFractal(seed);
+    }
+
+    randomizeFractal(); // initial draw
+
+    async function fetchTelemetry() {
+      try {
+        const response = await fetch('/api/telemetry'); // proxy to miner backend
+        const data = await response.json();
+        document.getElementById('hashrate').textContent = data.hashrate || 'N/A';
+        document.getElementById('temp').textContent = data.temp + '°C' || 'N/A';
+        document.getElementById('fan').textContent = data.fan_speed + '%' || 'N/A';
+        document.getElementById('zone').textContent = data.zone || 'N/A';
+      } catch (e) {
+        console.error('Telemetry fetch failed:', e);
+      }
+    }
+
+    setInterval(fetchTelemetry, 3000);
+    fetchTelemetry();
+  </script>
+</body>
+</html>
