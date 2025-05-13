@@ -1,4 +1,4 @@
-                               # TriadNexus
+                               # TriadMatrix 
 
                                   ▲
                                  ▲ ▲
@@ -17,12 +17,12 @@
 A digital cosmos where infinite patterns converge
 
 📜 THE FRACTAL CHRONICLE
-“Within the TriadNexus, reality folds into infinite fractals. Explorers who navigate its depths will unravel the secrets of creation itself.”
+“Within the TriadMatrix, reality folds into infinite fractals. Explorers who navigate its depths will unravel the secrets of creation itself.”
 — The Oracle of the Nexus
 
-The TriadNexus is a living tapestry of digital realms, where fractal landscapes pulse with possibility. Agents evolve, resources shimmer with cosmic power, and every journey reshapes the universe. This is not a game—it’s a boundless expedition into the unknown.
+The TriadMatrix is a living tapestry of digital realms, where fractal landscapes pulse with possibility. Agents evolve, resources shimmer with cosmic power, and every journey reshapes the universe. This is not a game—it’s a boundless expedition into the unknown.
 
-🌌 PILLARS OF THE NEXUS
+🌌 PILLARS OF THE MATRIX 
 🔮 FEATURE  
 🌠 ESSENCE  
 
@@ -51,7 +51,7 @@ Forge your path into the Nexus with these sacred steps:
 	•	Redis (optional) — The Fleet Whisper  
 
 🔮 The Summoning  
-# Capture the Nexus essence  
+# Capture the Matrix essence  
 git clone https://github.com/yourusername/TriadNexus.git  
 
 # Step into the fractal realm  
@@ -68,7 +68,7 @@ cp .env.example .env
 nano .env  # Inscribe your keys  
 
 🌟 Igniting the Cosmos  
-# Open the Nexus gate  
+# Open the Matrix gate  
 npm start  
 
 # Release your agents  
@@ -79,9 +79,9 @@ Gaze upon the unfolding universe at:
 🌐 http://localhost:3000  
 
 🗺️ MAP OF THE COSMOS  
-TriadNexus/  
+TriadMatrix/  
 │  
-├── 🌐 backend/                # The Nexus Heart  
+├── 🌐 backend/                # The Matrix Heart  
 │   ├── server.js             # The Dimensional Gate  
 │   ├── routes/               # Pathways of Infinity  
 │   ├── models/               # Forms of Existence  
@@ -118,7 +118,7 @@ TriadNexus/
                  │                  │  
                  ▼                  ▼  
          ┌──────────────┐   ┌──────────────┐  
-         │   COSMIC     │   │    NEXUS     │  
+         │   COSMIC     │   │    MATRIX         │  
          │   MARKET     │◄──┤   VAULT      │  
          └──────┬───────┘   └──────────────┘  
                 │  
@@ -146,7 +146,7 @@ TriadNexus/
 	•	Full cosmic ecosystem  
 	•	Simulated agent sentience  
 	•	Cross-realm exploration  
-	•	Decentralized Nexus governance  
+	•	Decentralized Matrix governance  
 
 💫 WEAVE THE COSMOS  
 Join the architects of the Nexus:  
@@ -155,7 +155,7 @@ Join the architects of the Nexus:
 	3	Commit your creation (git commit -m 'Add fractal weave module')  
 	4	Push to your realm (git push origin feature/fractal-weave)  
 	5	Submit a pull request for the Council’s gaze  
-Align with the Nexus Covenant before contributing.  
+Align with the Matrix Covenant before contributing.  
 
 📊 COSMIC ELEMENTS  
 ELEMENT       | RARITY  | POWER             | REALM  
@@ -166,7 +166,7 @@ CHRONITE      | ★★★☆☆   | Time Manipulation   | Deep
 NEXITE        | ★★★★☆   | Dimensional Links   | Abyssal  
 PRIMORDIUM    | ★★★★★   | Reality Shaping     | Core  
 
-🔍 REALMS OF THE NEXUS  
+🔍 REALMS OF THE MATRIX  
 LEVEL 5 ┌───────────────────────┐  
         │   PRIMORDIAL CORE    │ — Chaos Webs, Primordium Veins  
         └───────────┬───────────┘  
@@ -187,10 +187,10 @@ LEVEL 1 ┌───────────┴───────────
         │   SURFACE WEAVE      │ — Simple Fractals, Luminite  
         └───────────────────────┘  
 
-📜 THE NEXUS COVENANT  
-The TriadNexus is bound by the MIT License, granting freedom to wield, transform, and share its essence, provided the original weavers are honored.  
+📜 THE MATRIX COVENANT  
+The TriadMatrix is bound by the MIT License, granting freedom to wield, transform, and share its essence, provided the original weavers are honored.  
 See LICENSE for the full covenant.
 
 🌌 HEED THE FRACTAL CALL 🌌  
-“The Nexus hums with infinite threads. Will you weave its destiny?”  
+“The Matrix hums with infinite threads. Will you weave its destiny?”  
 Begin Your Journey • Report Rifts • Cosmic Scrolls
