@@ -1,96 +1,689 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>TriadNexus Explorer v0.1</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    canvas { display: block; margin: auto; border: 2px solid #4ade80; }
-    .telemetry { font-family: monospace; }
-  </style>
-</head>
-<body class="bg-black text-green-400">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>TriadMatrix - Interactive Fractal Triangle with Zoom Controls</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;900&display=swap" rel="stylesheet" />
+<style>
+  * {
+    box-sizing: border-box;
+  }
+  html, body {
+    margin: 0; padding: 0; min-height: 100vh;
+    background-color: #000;
+    display: flex;
+    flex-direction: column;
+    font-family: 'Montserrat', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    user-select: none;
+    overflow-x: hidden;
+    color: #0ff;
+  }
+  /* Title styling centered */
+  #title {
+    font-weight: 900;
+    font-size: 3rem;
+    letter-spacing: 0.15em;
+    margin: 1.2rem 0 0.8rem 0;
+    text-transform: none;
+    font-family: 'Montserrat', sans-serif;
+    color: #0ff;
+    text-align: center;
+    text-shadow:
+      0 0 8px #0ff,
+      0 0 16px #0ff,
+      0 0 24px #0ff,
+      0 0 40px #0ff;
+    user-select: none;
+    width: 100%;
+  }
 
-  <!-- Header -->
-  <header class="text-center py-6 border-b border-green-700">
-    <h1 class="text-4xl font-bold text-green-300 tracking-wide">TriadNexus v0.1</h1>
-    <p class="text-sm text-green-500 mt-2">Fractal Explorer + Live Miner Telemetry</p>
-  </header>
+  #main-container {
+    flex-shrink: 0;
+    display: flex;
+    width: 100vw;
+    max-width: 950px;
+    margin: 0 auto;
+    padding: 0 0.5rem 1rem 0.5rem;
+    height: 480px;
+  }
 
-  <!-- Main Grid -->
-  <main class="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6">
+  #buttons-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    align-items: center;
+    padding-left: 0.5rem;
+    flex-shrink: 0;
+  }
+
+  button.triangle-btn {
+    position: relative;
+    width: 36px;
+    height: 36px;
+    background: transparent;
+    cursor: pointer;
+    border: none;
+    padding: 0;
+    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+    -webkit-clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+    background: linear-gradient(135deg, #00f6ff, #0fffda);
+    box-shadow:
+      0 0 6px #00f6ff,
+      0 0 10px #0fffda,
+      0 0 14px #00f6ff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #000;
+    font-weight: 900;
+    font-size: 1.3rem;
+    user-select: none;
+    transition: background 0.3s ease, box-shadow 0.3s ease, transform 0.15s ease;
+  }
+  button.triangle-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #0fffda, #00f6ff);
+    box-shadow:
+      0 0 14px #0fffda,
+      0 0 22px #00f6ff,
+      0 0 30px #0fffda;
+    transform: scale(1.05);
+  }
+  button.triangle-btn:active:not(:disabled) {
+    transform: scale(0.95);
+    transition: transform 0.1s ease;
+  }
+  button.triangle-btn:disabled {
+    opacity: 0.25;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+  #zoom-out {
+    transform: rotate(180deg);
+  }
+  #reset {
+    clip-path: polygon(0% 50%, 50% 100%, 100% 50%, 50% 0%);
+    -webkit-clip-path: polygon(0% 50%, 50% 100%, 100% 50%, 50% 0%);
+    font-size: 1.1rem;
+    background: linear-gradient(135deg, #00f6ff, #0fffda);
+  }
+
+  #svg-container {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  svg {
+    max-width: 100%;
+    max-height: 100%;
+    display: block;
+    touch-action: manipulation;
+    overflow: visible;
+  }
+
+  polygon {
+    cursor: pointer;
+    fill: transparent !important;
+    stroke-width: 2.5;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+    transition: stroke-width 0.3s ease, filter 0.3s ease;
+    stroke-linecap: round;
+    stroke: var(--stroke-base-color);
+    filter:
+      drop-shadow(0 0 8px var(--stroke-base-color))
+      drop-shadow(0 0 18px var(--stroke-base-color));
+    animation: shimmerAnim 3s ease-in-out infinite alternate;
+  }
+  polygon:hover {
+    stroke-width: 3.5;
+    filter:
+      drop-shadow(0 0 20px var(--stroke-base-color))
+      drop-shadow(0 0 40px var(--stroke-base-color));
+  }
+  @keyframes shimmerAnim {
+    0% {
+      stroke-dashoffset: 700;
+      filter:
+        drop-shadow(0 0 8px var(--stroke-base-color))
+        drop-shadow(0 0 18px var(--stroke-base-color));
+    }
+    100% {
+      stroke-dashoffset: 0;
+      filter:
+        drop-shadow(0 0 40px var(--stroke-base-color))
+        drop-shadow(0 0 70px var(--stroke-base-color));
+    }
+  }
+
+  /* Scroll arrow container and arrow styling */
+  .scroll-indicator {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin: 1rem 0 2rem 0;
+  }
+  .scroll-arrow-svg {
+    width: 40px;
+    height: 40px;
+  }
+  .scroll-arrow-line {
+    stroke: #0ff;
+    stroke-width: 3;
+    stroke-linecap: round;
+    filter: drop-shadow(0 0 6px #0ff) drop-shadow(0 0 12px #0ff);
+    animation: line-move 2.5s ease-in-out infinite alternate;
+  }
+  @keyframes line-move {
+    0% { stroke-dashoffset: 0; }
+    100% { stroke-dashoffset: 10; }
+  }
+
+  /* Content section styles adapted from provided content */
+  header {
+    padding: 2rem 0 1rem 0;
+    text-align: center;
+    position: relative;
+  }
+  
+  .logo {
+    font-weight: 900;
+    font-size: 3.5rem;
+    letter-spacing: 0.15em;
+    color: #0ff;
+    text-shadow:
+      0 0 8px #0ff,
+      0 0 16px #0ff,
+      0 0 24px #0ff;
+    margin-bottom: 1rem;
+  }
+  
+  .tagline {
+    font-weight: 300;
+    font-size: 1.2rem;
+    color: #0ff;
+    opacity: 0.8;
+    letter-spacing: 0.1em;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+  
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem 4rem 2rem;
+  }
+  
+  .hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 3rem 0;
+    min-height: 600px;
+  }
+  
+  .hero-content {
+    flex: 1;
+    padding-right: 2rem;
+  }
+  
+  .hero-visual {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+  }
+  
+  h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    background: linear-gradient(90deg, #0ff, #0fffda);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  
+  p {
+    margin-bottom: 1.5rem;
+    color: #bbb;
+    font-size: 1.1rem;
+  }
+  
+  .btn {
+    display: inline-block;
+    background: linear-gradient(135deg, #00f6ff, #0fffda);
+    color: #000;
+    font-weight: 700;
+    text-decoration: none;
+    padding: 1rem 2.5rem;
+    font-size: 1.1rem;
+    border-radius: 50px;
+    letter-spacing: 0.05em;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+    box-shadow:
+      0 0 10px rgba(0, 246, 255, 0.5),
+      0 0 20px rgba(15, 255, 218, 0.3);
+    text-transform: uppercase;
+    margin-right: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .btn:hover {
+    transform: translateY(-3px);
+    box-shadow:
+      0 0 15px rgba(0, 246, 255, 0.7),
+      0 0 30px rgba(15, 255, 218, 0.5);
+  }
+  
+  .btn-outline {
+    background: transparent;
+    border: 2px solid #0ff;
+    color: #0ff;
+  }
+  
+  .btn-outline:hover {
+    background: rgba(0, 255, 255, 0.1);
+  }
+  
+  .features {
+    padding: 5rem 0;
+    background: rgba(0, 30, 40, 0.2);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .features::before {
+    content: '';
+    position: absolute;
+    top: -50px;
+    left: 0;
+    right: 0;
+    height: 100px;
+    background: linear-gradient(to bottom, transparent, rgba(0, 30, 40, 0.2));
+    z-index: 1;
+  }
+  
+  .section-title {
+    text-align: center;
+    margin-bottom: 3rem;
+    font-size: 2rem;
+    color: #0ff;
+    letter-spacing: 0.1em;
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+  }
+  
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+  }
+  
+  .feature-item {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(0, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 2rem;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    position: relative;
+    z-index: 2;
+  }
+  
+  .feature-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 255, 255, 0.1);
+    border-color: rgba(0, 255, 255, 0.3);
+  }
+  
+  .feature-icon {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 1.5rem;
+    background: linear-gradient(135deg, #00f6ff, #0fffda);
+    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5rem;
+    color: #000;
+    font-weight: bold;
+  }
+  
+  .feature-title {
+    font-size: 1.3rem;
+    margin-bottom: 0.8rem;
+    color: #0ff;
+  }
+  
+  .cta {
+    padding: 5rem 0;
+    text-align: center;
+  }
+  
+  .footer {
+    background-color: rgba(0, 0, 0, 0.8);
+    padding: 2rem 0;
+    text-align: center;
+    color: #555;
+    font-size: 0.9rem;
+  }
+  
+  .footer a {
+    color: #0ff;
+    text-decoration: none;
+    transition: all 0.3s ease;
+  }
+  
+  .footer a:hover {
+    color: #0fffda;
+  }
+  
+  @media (max-width: 1024px) {
+    .hero {
+      flex-direction: column;
+      text-align: center;
+    }
     
-    <!-- Fractal Canvas -->
-    <section class="flex flex-col items-center">
-      <h2 class="text-xl font-semibold mb-2">Fractal Viewport</h2>
-      <canvas id="fractalCanvas" width="512" height="512"></canvas>
-      <button onclick="randomizeFractal()" class="mt-4 px-4 py-2 bg-green-700 hover:bg-green-600 rounded">
-        Randomize Fractal
-      </button>
-    </section>
+    .hero-content {
+      padding-right: 0;
+      margin-bottom: 3rem;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .logo {
+      font-size: 2.5rem;
+    }
+    
+    h1 {
+      font-size: 2rem;
+    }
+    
+    .feature-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+</head>
+<body>
+  <div id="title" aria-label="App title">Triad<span class="m">M</span>atrix</div>
+  <div id="main-container" role="main" aria-label="Interactive equilateral triangle subdivision app">
+    <div id="buttons-panel" aria-label="Zoom controls">
+      <button type="button" class="triangle-btn" id="zoom-in" aria-label="Zoom in" title="Zoom In">+</button>
+      <button type="button" class="triangle-btn" id="zoom-out" aria-label="Zoom out" title="Zoom Out">−</button>
+      <button type="button" class="triangle-btn" id="reset" aria-label="Reset fractal and zoom" title="Reset">&#x27F3;</button>
+    </div>
+    <div id="svg-container">
+      <svg id="triangles"
+           viewBox="0 0 100 87"
+           preserveAspectRatio="xMidYMid meet"
+           xmlns="http://www.w3.org/2000/svg"
+           aria-live="polite"
+           aria-atomic="true"
+           role="img"></svg>
+    </div>
+  </div>
 
-    <!-- Miner Telemetry -->
-    <section>
-      <h2 class="text-xl font-semibold mb-4">Miner Telemetry</h2>
-      <div id="telemetry" class="telemetry bg-green-900 p-4 rounded shadow-md space-y-2">
-        <p><strong>Hashrate:</strong> <span id="hashrate">Loading...</span></p>
-        <p><strong>Temperature:</strong> <span id="temp">Loading...</span></p>
-        <p><strong>Fan Speed:</strong> <span id="fan">Loading...</span></p>
-        <p><strong>Exploration Zone:</strong> <span id="zone">Loading...</span></p>
+  <div class="scroll-indicator" aria-hidden="true" title="Scroll down to see more">
+    <svg class="scroll-arrow-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" >
+      <line class="scroll-arrow-line" x1="12" y1="6" x2="12" y2="18"/>
+      <polyline class="scroll-arrow-line" points="6,12 12,18 18,12"/>
+    </svg>
+  </div>
+
+  <header>
+    <div class="logo" aria-label="TriadMatrix Logo">tRiad<span>M</span>atrix</div>
+    <div class="tagline">A Fractal-Based Cryptocurrency Revolution</div>
+  </header>
+  
+  <main>
+    <section class="hero">
+      <div class="container">
+        <div class="hero-content">
+          <h1>The Future of Decentralized Finance is Fractal</h1>
+          <p>TriadMatrix introduces a groundbreaking decentralized ecosystem powered by triangular fractal technology. Our unique triangle splitting mechanism creates a sustainable and energy-efficient mining process that scales with network growth.</p>
+          <p>Join the revolution that's redefining how digital assets are created, distributed, and valued in the cryptosphere.</p>
+          <a href="#" class="btn">Join Whitelist</a>
+          <a href="#" class="btn btn-outline">Read Whitepaper</a>
+        </div>
+        <div class="hero-visual">
+          <svg class="triangle-visual" width="400" height="400" viewBox="0 0 100 87" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" >
+            <polygon class="glow-triangle" points="50,0 0,87 100,87" />
+            <polygon class="glow-triangle animate-pulse" points="50,0 25,43.5 75,43.5" />
+            <polygon class="glow-triangle animate-pulse-delay-1" points="25,43.5 0,87 50,87" />
+            <polygon class="glow-triangle animate-pulse-delay-2" points="75,43.5 50,87 100,87" />
+            <polygon class="glow-triangle animate-pulse" points="37.5,21.75 25,43.5 50,43.5" />
+          </svg>
+        </div>
       </div>
     </section>
-
+    
+    <section class="features">
+      <div class="container">
+        <h2 class="section-title">Core Features</h2>
+        <div class="feature-grid">
+          <div class="feature-item">
+            <div class="feature-icon" aria-hidden="true">▲</div>
+            <h3 class="feature-title">Fractal Mining</h3>
+            <p>Our proprietary triangle splitting mechanism creates a sustainable mining ecosystem that grows organically with network usage, eliminating wasteful computational processes.</p>
+          </div>
+          
+          <div class="feature-item">
+            <div class="feature-icon" aria-hidden="true">▲</div>
+            <h3 class="feature-title">Agent-Driven Economy</h3>
+            <p>Autonomous and player-controlled agents participate in exploration, self-replication, and dynamic resource harvesting within the TriadMatrix ecosystem.</p>
+          </div>
+          
+          <div class="feature-item">
+            <div class="feature-icon" aria-hidden="true">▲</div>
+            <h3 class="feature-title">Emergent Value</h3>
+            <p>The system powers an economic model driven by exploration depth and tiered rarity—moving away from the traditional focus on computational waste.</p>
+          </div>
+          
+          <div class="feature-item">
+            <div class="feature-icon" aria-hidden="true">▲</div>
+            <h3 class="feature-title">Energy Efficient</h3>
+            <p>Our triangle-based consensus algorithm requires significantly less energy than traditional Proof of Work systems while maintaining robust security.</p>
+          </div>
+          
+          <div class="feature-item">
+            <div class="feature-icon" aria-hidden="true">▲</div>
+            <h3 class="feature-title">Self-Replicating System</h3>
+            <p>The TriadMatrix network grows organically through self-replication protocols inspired by natural fractal systems.</p>
+          </div>
+          
+          <div class="feature-item">
+            <div class="feature-icon" aria-hidden="true">▲</div>
+            <h3 class="feature-title">Dynamic Rewards</h3>
+            <p>Deeper exploration yields increasingly rare and valuable rewards, incentivizing long-term participation and ecosystem growth.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <section class="cta">
+      <div class="container">
+        <h2 class="section-title">Join the TriadMatrix Revolution</h2>
+        <p>Be among the first to participate in the future of decentralized finance.</p>
+        <a href="#" class="btn">Join Whitelist</a>
+        <a href="#" class="btn btn-outline">Read Whitepaper</a>
+      </div>
+    </section>
   </main>
+  
+  <footer class="footer">
+    <div class="container">
+      <p>© 2025 TriadMatrix. All rights reserved.</p>
+      <p>
+        <a href="#">Privacy Policy</a> | 
+        <a href="#">Terms of Service</a> | 
+        <a href="#">Contact</a>
+      </p>
+    </div>
+  </footer>
 
-  <script>
-    const canvas = document.getElementById('fractalCanvas');
-    const ctx = canvas.getContext('2d');
+<script>
+(() => {
+  const svg = document.getElementById('triangles');
+  const btnZoomIn = document.getElementById('zoom-in');
+  const btnZoomOut = document.getElementById('zoom-out');
+  const btnReset = document.getElementById('reset');
 
-    function drawFractal(seed) {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      const centerX = canvas.width / 2;
-      const centerY = canvas.height / 2;
-      const maxRadius = Math.min(centerX, centerY) * 0.9;
-      const layers = 6 + Math.floor(seed % 6);
-      const branches = 3 + (seed % 5);
+  const MIN_SIDE_BASE = 5;
+  const MAX_ZOOM_LEVEL = 20;
+  const ZOOM_FACTOR = 1.5;
 
-      for (let i = 0; i < layers; i++) {
-        const radius = (i + 1) * (maxRadius / layers);
-        for (let j = 0; j < branches; j++) {
-          const angle = (j * 2 * Math.PI) / branches + (i * 0.2);
-          const x = centerX + radius * Math.cos(angle);
-          const y = centerY + radius * Math.sin(angle);
-          ctx.beginPath();
-          ctx.arc(x, y, 6 + (seed % 4), 0, 2 * Math.PI);
-          ctx.fillStyle = `hsl(${(i * 60 + seed * 10) % 360}, 100%, 60%)`;
-          ctx.fill();
-        }
-      }
+  let zoomLevel = 0;
+  let viewBox = { x: 0, y: 0, width: 100, height: 87 };
+
+  function updateViewBox() {
+    svg.setAttribute('viewBox', `${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`);
+  }
+
+  function zoomIn(centerX = null, centerY = null) {
+    if (zoomLevel >= MAX_ZOOM_LEVEL) return;
+    const newWidth = viewBox.width / ZOOM_FACTOR;
+    const newHeight = viewBox.height / ZOOM_FACTOR;
+
+    if (centerX === null || centerY === null) {
+      centerX = viewBox.x + viewBox.width / 2;
+      centerY = viewBox.y + viewBox.height / 2;
     }
 
-    function randomizeFractal() {
-      const seed = Math.floor(Math.random() * 1000);
-      drawFractal(seed);
+    viewBox.x = centerX - newWidth / 2;
+    viewBox.y = centerY - newHeight / 2;
+    viewBox.width = newWidth;
+    viewBox.height = newHeight;
+
+    zoomLevel++;
+    updateViewBox();
+    updateControls();
+  }
+
+  function zoomOut() {
+    if (zoomLevel <= 0) return;
+    const newWidth = viewBox.width * ZOOM_FACTOR;
+    const newHeight = viewBox.height * ZOOM_FACTOR;
+    const centerX = viewBox.x + viewBox.width / 2;
+    const centerY = viewBox.y + viewBox.height / 2;
+    viewBox.x = centerX - newWidth / 2;
+    viewBox.y = centerY - newHeight / 2;
+    viewBox.width = newWidth;
+    viewBox.height = newHeight;
+
+    zoomLevel--;
+    updateViewBox();
+    updateControls();
+  }
+
+  function reset() {
+    zoomLevel = 0;
+    viewBox = { x: 0, y: 0, width: 100, height: 87 };
+    updateViewBox();
+    updateControls();
+    init();
+  }
+
+  function updateControls() {
+    btnZoomIn.disabled = zoomLevel >= MAX_ZOOM_LEVEL;
+    btnZoomOut.disabled = zoomLevel <= 0;
+  }
+
+  btnZoomIn.addEventListener('click', () => zoomIn());
+  btnZoomOut.addEventListener('click', () => zoomOut());
+  btnReset.addEventListener('click', () => reset());
+
+  function midpoint(p1, p2) {
+    return [(p1[0] + p2[0]) / 2, (p1[1] + p2[1]) / 2];
+  }
+
+  function sideLength(p1, p2) {
+    return Math.hypot(p2[0] - p1[0], p2[1] - p1[1]);
+  }
+
+  function getColor(level, orientation, flipped) {
+    let baseHue = orientation === 'up' ? 180 : 340;
+    let baseSat = orientation === 'up' ? 90 : 95;
+    let baseLight = 65;
+
+    baseLight -= level * 7;
+    if (baseLight < 18) baseLight = 18;
+    baseSat -= level * 10;
+    if (baseSat < 38) baseSat = 38;
+
+    if (flipped) {
+      baseHue = (baseHue + 180) % 360;
+      baseLight = 100 - baseLight;
+      baseSat = Math.max(baseSat - 12, 30);
     }
 
-    randomizeFractal(); // initial draw
+    return `hsl(${baseHue}, ${baseSat}%, ${baseLight}%)`;
+  }
 
-    async function fetchTelemetry() {
-      try {
-        const response = await fetch('/api/telemetry'); // proxy to miner backend
-        const data = await response.json();
-        document.getElementById('hashrate').textContent = data.hashrate || 'N/A';
-        document.getElementById('temp').textContent = data.temp + '°C' || 'N/A';
-        document.getElementById('fan').textContent = data.fan_speed + '%' || 'N/A';
-        document.getElementById('zone').textContent = data.zone || 'N/A';
-      } catch (e) {
-        console.error('Telemetry fetch failed:', e);
-      }
-    }
+  function createTriangle(points, level, orientation, flipped = false) {
+    const poly = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+    poly.setAttribute('points', points.map(p => p.join(',')).join(' '));
+    poly.dataset.level = level;
+    poly.dataset.points = JSON.stringify(points);
+    poly.dataset.orientation = orientation;
+    poly.dataset.flipped = flipped;
 
-    setInterval(fetchTelemetry, 3000);
-    fetchTelemetry();
-  </script>
-</body>
-</html>
+    poly.style.setProperty('--stroke-base-color', getColor(level, orientation, flipped));
+    poly.style.fill = 'transparent';
+    poly.style.strokeWidth = '2.5';
+    poly.style.strokeLinecap = 'round';
+    poly.style.vectorEffect = 'non-scaling-stroke';
+    poly.style.transition = 'stroke-width 0.3s ease, filter 0.3s ease';
+    poly.style.stroke = 'var(--stroke-base-color)';
+    poly.style.filter =
+      `drop-shadow(0 0 8px var(--stroke-base-color)) drop-shadow(0 0 18px var(--stroke-base-color))`;
+    const circumferenceGuess = 300;
+    poly.style.strokeDasharray = circumferenceGuess;
+    poly.style.strokeDashoffset = circumferenceGuess;
+    poly.style.animation = 'shimmerAnim 3s ease-in-out infinite alternate';
+
+    poly.addEventListener('mouseenter', () => {
+      poly.style.strokeWidth = '3.5';
+      poly.style.filter =
+        `drop-shadow(0 0 20px var(--stroke-base-color)) drop-shadow(0 0 40px var(--stroke-base-color))`;
+    });
+    poly.addEventListener('mouseleave', () => {
+      poly.style.strokeWidth = '2.5';
+      poly.style.filter =
+        `drop-shadow(0 0 8px var(--stroke-base-color)) drop-shadow(0 0 18px var(--stroke-base-color))`;
+    });
+
+    poly.addEventListener('animationiteration', () => {
+      const currentFlipped = poly.dataset.flipped === 'true';
+      poly.dataset.flipped = (!currentFlipped).toString();
+      poly.style.setProperty('--stroke-base-color', getColor(level, orientation, !currentFlipped));
+    });
+
+    poly.addEventListener('click', (e) => {
+      e.stopPropagation();
+      subdivideTriangle(poly);
+    });
+
+    return poly;
+  }
+
+  function subdivideTriangle(poly) {
+    const points = JSON.parse(poly.dataset.points);
+    const level = parseInt(poly.dataset.level) + 1;
+    const orientation = poly.dataset.orientation;
+    const flipped = poly.dataset.flipped === 'true';
+    const len = sideLength(points[0], points[1]);
+    const effectiveMinSide = MIN_SIDE_BASE / Math.pow(ZOOM_FACTOR, zoomLevel);
+
+    if (len < effectiveMinSide) {
+      const centroid = [
+        (points[0][0] + points[1][0] + points[2][0]) / 3,
+        (points[0][1] + points[1][1] + points[2][1]) 
